@@ -1,0 +1,11 @@
+{
+    "name": "Minha Extensão",
+    "version": "1.0",
+    "manifest_version": 2,
+    "permissions": [
+        "sockets"
+    ],
+    "background": {
+        "scripts": ["background.js"]
+    }
+}

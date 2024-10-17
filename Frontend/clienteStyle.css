@@ -1,0 +1,147 @@
+body {
+    background-image: url(background.jpg);
+    background-size: cover; /* Ajusta a imagem para cobrir toda a área */
+    background-repeat: no-repeat; /* Evita que a imagem se repita */
+    align-items: center;
+    text-align: center;
+}
+
+.principal {
+    font: Arial;
+    color: aliceblue;
+    position: absolute;
+    margin: 10px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1000px;
+    height: 600px;
+    background-color: rgb(0, 0, 0);
+    opacity: 80%;
+    box-shadow: 100px 100px 100px rgba(193, 49, 49, 0.5); /* Adiciona a sombra */
+    text-align: center; /* Centraliza o texto */
+}
+
+.button-voltar {
+    position: absolute; /* Define a posição absoluta para o botão */
+    top: 10px; /* Define a distância do topo */
+    left: 10px; /* Define a distância da esquerda */
+    background-color: #f0f0f0; /* Cor de fundo do botão */
+    border: none; /* Remove a borda do botão */
+    padding: 10px; /* Adiciona padding ao botão */
+    cursor: pointer; /* Adiciona cursor de ponteiro ao passar o mouse */
+}
+
+.opcoes-origem {
+    display: flex;
+    flex-wrap: wrap; /* Permite quebra de linha */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 10px; /* Espaçamento entre os botões */
+    height: 50%; /* Garante que os botões ocupem toda a altura disponível */
+}
+
+.opcoes-origem button {
+    flex: 1 1 150%; /* Cada botão ocupa aproximadamente 30% da largura do contêiner */
+    max-width: 20%; /* Limita a largura máxima dos botões */
+    box-sizing: border-box; /* Inclui padding e border no tamanho total */
+}
+
+.opcoes-destino {
+    display: none;
+    flex-wrap: wrap; /* Permite quebra de linha */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 10px; /* Espaçamento entre os botões */
+    height: 50%; /* Garante que os botões ocupem toda a altura disponível */
+}
+
+.opcoes-destino button {
+    flex: 1 1 150%; /* Cada botão ocupa aproximadamente 30% da largura do contêiner */
+    max-width: 20%; /* Limita a largura máxima dos botões */
+    box-sizing: border-box; /* Inclui padding e border no tamanho total */
+}
+
+
+button.descobrir-rotas {
+    position: absolute;
+    bottom: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: rgb(0, 229, 255);
+    background: #000000 !important;
+}
+
+
+
+/*Navbar*/
+
+.header-nav {
+    background: linear-gradient(90deg, #4468bd, #0da4c2);
+    font-size: medium;
+    color: #fff;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar {
+    display: flex;
+    justify-content: center; /* Centraliza o conteúdo */
+    align-items: center;
+}
+
+/* From Uiverse.io by Kabak */ 
+button {
+    height: 50px;
+    margin: 5px;
+    width: 120px;
+    background: #333;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-family: Consolas, Courier New, monospace;
+    border: solid #404c5d 1px;
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    -webkit-transition: 500ms;
+    transition: 500ms;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #2e2d2d, #212121);
+    -webkit-box-shadow: -1px -5px 15px #41465b, 5px 5px 15px #41465b,
+      inset 5px 5px 10px #212121, inset -5px -5px 10px #212121;
+    box-shadow: -1px -5px 15px #41465b, 5px 5px 15px #41465b,
+      inset 5px 5px 10px #212121, inset -5px -5px 10px #212121;
+  }
+  
+  button:hover {
+    -webkit-box-shadow: 1px 1px 13px #20232e, -1px -1px 13px #545b78;
+    box-shadow: 1px 1px 13px #20232e, -1px -1px 13px #545b78;
+    color: #d6d6d6;
+    -webkit-transition: 500ms;
+    transition: 500ms;
+  }
+  
+  button:active {
+    -webkit-box-shadow: 1px 1px 13px #20232e, -1px -1px 33px #545b78;
+    box-shadow: 1px 1px 13px #20232e, -1px -1px 33px #545b78;
+    color: #d6d6d6;
+    -webkit-transition: 100ms;
+    transition: 100ms;
+  }
+
+
+.input-hidden {
+    display: none;
+}
+.input-visible {
+    display: block;
+}
+

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="clienteStyle.css">
+    <script src="ClienteFront.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <header class="header-nav">
+        <nav class="navbar">
+            <div class="nav-container">
+                <h1>VENDEPASS</h1>
+            </div>
+        </nav>
+    </header>
+    
+
+    <div class="principal">
+        <h1>Bem Vindo!</h1>
+        <p id = "paragrafo-origem-destino" style="font-size: 20px;" > Escolha seu local de origem</p>
+
+        <button class="button-voltar" style="display: none;" onclick="voltar()" > Voltar </button>
+        <input type="text" class="nomeUser" placeholder="Digite seu nome" style="margin: 10px; height: 30px; width: 300px;">
+
+        <div class="opcoes-origem">
+            <button onclick="receberOrigem(this)">São Paulo (SP)</button>
+            <button onclick="receberOrigem(this)">Rio de Janeiro (RJ)</button>
+            <button onclick="receberOrigem(this)">Belo Horizonte (MG)</button>
+            <button onclick="receberOrigem(this)">Brasília (DF)</button>
+            <button onclick="receberOrigem(this)">Salvador (BA)</button>
+            <button onclick="receberOrigem(this)">Recife (PE)</button>
+            <button onclick="receberOrigem(this)">Porto Alegre (RS)</button>
+            <button onclick="receberOrigem(this)">Curitiba (PR)</button>
+            <button onclick="receberOrigem(this)">Fortaleza (CE)</button>
+            <button onclick="receberOrigem(this)">Manaus (AM)</button>
+
+        </div>
+
+        <div class="opcoes-destino"> 
+            <button onclick="receberDestino(this)">São Paulo (SP)</button>
+            <button onclick="receberDestino(this)">Rio de Janeiro (RJ)</button>
+            <button onclick="receberDestino(this)">Belo Horizonte (MG)</button>
+            <button onclick="receberDestino(this)">Brasília (DF)</button>
+            <button onclick="receberDestino(this)">Salvador (BA)</button>
+            <button onclick="receberDestino(this)">Recife (PE)</button>
+            <button onclick="receberDestino(this)">Porto Alegre (RS)</button>
+            <button onclick="receberDestino(this)">Curitiba (PR)</button>
+            <button onclick="receberDestino(this)">Fortaleza (CE)</button>
+            <button onclick="receberDestino(this)">Manaus (AM)</button>
+        </div>
+
+        <button class="descobrir-rotas" style="display: none;" onclick="descobrirRotas()"> Descobrir rotas </button>
+
+    </div>
+    
+</body>
+</html>

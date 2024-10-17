@@ -1,0 +1,54 @@
+São Paulo Rio de Janeiro
+São Paulo Belo Horizonte
+São Paulo Brasília
+São Paulo Salvador
+São Paulo Recife
+São Paulo Porto Alegre
+São Paulo Curitiba
+São Paulo Fortaleza
+São Paulo Manaus
+
+Rio de Janeiro Belo Horizonte
+Rio de Janeiro Brasília
+Rio de Janeiro Salvador
+Rio de Janeiro Recife
+Rio de Janeiro Porto Alegre
+Rio de Janeiro Curitiba
+Rio de Janeiro Fortaleza
+Rio de Janeiro Manaus
+
+Belo Horizonte Brasília
+Belo Horizonte Salvador
+Belo Horizonte Recife
+Belo Horizonte Porto Alegre
+Belo Horizonte Curitiba
+Belo Horizonte Fortaleza
+Belo Horizonte Manaus
+
+Brasília Salvador
+Brasília Recife
+Brasília Porto Alegre
+Brasília Curitiba
+Brasília Fortaleza
+Brasília Manaus
+
+Salvador Recife
+Salvador Porto Alegre
+Salvador Curitiba
+Salvador Fortaleza
+Salvador Manaus
+
+Recife Porto Alegre
+Recife Curitiba
+Recife Fortaleza
+Recife Manaus
+
+Porto Alegre Curitiba
+Porto Alegre Fortaleza
+Porto Alegre Manaus
+
+Curitiba Fortaleza
+Curitiba Manaus
+
+Fortaleza Manaus
+
