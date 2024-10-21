@@ -72,6 +72,48 @@ button.descobrir-rotas {
     background: #000000 !important;
 }
 
+/* Mantém o estilo dos botões para os resultados */
+.resultado {
+    display: none;
+    flex-direction: column; /* Alinha os botões verticalmente */
+    align-items: center;    /* Centraliza os botões horizontalmente */
+    justify-content: center; /* Centraliza os botões verticalmente */
+    gap: 1px; /* Espaçamento entre os botões */
+}
+
+.resultado button {
+    height: 50px;
+    margin: 3px; /* Espaçamento entre os botões */
+    width: 80%; /* Aumenta a largura dos botões */
+    background: #333;
+    justify-content: center;
+    cursor: pointer;
+    align-items: center;
+    font-family: Consolas, Courier New, monospace;
+    border: solid #404c5d 1px;
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    transition: 500ms;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #2e2d2d, #212121);
+    box-shadow: -1px -5px 15px #41465b, 5px 5px 15px #41465b,
+                inset 5px 5px 10px #212121, inset -5px -5px 10px #212121;
+}
+
+.resultado button:hover {
+    box-shadow: 1px 1px 13px #20232e, -1px -1px 13px #545b78;
+    color: #d6d6d6;
+    transition: 500ms;
+}
+
+.resultado button:active {
+    box-shadow: 1px 1px 13px #20232e, -1px -1px 33px #545b78;
+    color: #d6d6d6;
+    transition: 100ms;
+}
+
+
+
 
 
 /*Navbar*/
