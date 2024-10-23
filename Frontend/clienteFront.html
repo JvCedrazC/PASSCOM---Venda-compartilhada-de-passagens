@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="clienteStyle.css">
-    <script src="ClienteFront.js"></script>
+    <script src="ClienteFront.js" defer></script>
     <title>Document</title>
 </head>
 <body>
@@ -22,34 +22,34 @@
         <input type="text" class="nomeUser" placeholder="Digite seu nome" style="margin: 10px; height: 30px; width: 300px;">
         <div class="opcoes-origem">
             <button onclick="receberOrigem(this)">Barreiras</button>
-            <button onclick="receberOrigem(this)">Uberlandia</button>
-            <button onclick="receberOrigem(this)">Patos</button>
-            <button onclick="receberOrigem(this)">Vitoria</button>
             <button onclick="receberOrigem(this)">Salvador</button>
-            <button onclick="receberOrigem(this)">Recife</button>
-            <button onclick="receberOrigem(this)">Terezina</button>
-            <button onclick="receberOrigem(this)">Brasilia</button>
             <button onclick="receberOrigem(this)">Fortaleza</button>
+            <button onclick="receberOrigem(this)">Brasilia</button>
+            <button onclick="receberOrigem(this)">Patos</button>
+            <button onclick="receberOrigem(this)">Terezina</button>
+            <button onclick="receberOrigem(this)">Vitoria</button>
+            <button onclick="receberOrigem(this)">Uberlandia</button>
+            <button onclick="receberOrigem(this)">Recife</button>
             <button onclick="receberOrigem(this)">Manaus</button>
         </div>
         <div class="opcoes-destino" style="display: none;">
             <button onclick="receberDestino(this)">Barreiras</button>
-            <button onclick="receberDestino(this)">Uberlandia</button>
-            <button onclick="receberDestino(this)">Patos</button>
-            <button onclick="receberDestino(this)">Vitoria</button>
             <button onclick="receberDestino(this)">Salvador</button>
-            <button onclick="receberDestino(this)">Recife</button>
-            <button onclick="receberDestino(this)">Terezina</button>
-            <button onclick="receberDestino(this)">Brasilia</button>
             <button onclick="receberDestino(this)">Fortaleza</button>
+            <button onclick="receberDestino(this)">Brasilia</button>
+            <button onclick="receberDestino(this)">Patos</button>
+            <button onclick="receberDestino(this)">Terezina</button>
+            <button onclick="receberDestino(this)">Vitoria</button>
+            <button onclick="receberDestino(this)">Uberlandia</button>
+            <button onclick="receberDestino(this)">Recife</button>
             <button onclick="receberDestino(this)">Manaus</button>
         </div>
         <div class="resultado" style="display: none;">
-            <p class="passagem-rota1">Passagens disponiveis: </p>
+            <p class="passagem-rota1">Passagens disponíveis:</p>
             <button id="rota1" onclick="comprarPassagem(this)">Rota 1 indisponível</button>
-            <p class="passagem-rota2">Passagens disponiveis: </p>
+            <p class="passagem-rota2">Passagens disponíveis:</p>
             <button id="rota2" onclick="comprarPassagem(this)">Rota 2 indisponível</button>
-            <p class="passagem-rota3">Passagens disponiveis: </p>
+            <p class="passagem-rota3">Passagens disponíveis:</p>
             <button id="rota3" onclick="comprarPassagem(this)">Rota 3 indisponível</button>
         </div>
         <button class="descobrir-rotas" style="display: none;" onclick="enviarRota()"> Descobrir rotas </button>

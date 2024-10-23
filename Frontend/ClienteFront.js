@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
     var origem;
     var destino;
-    var rotasDisponiveis = [];  // Guardar rotas e passagens disponíveis
+    var rotasDisponiveis = {};  // Guardar rotas e passagens disponíveis
     var ws;
 
     console.log("Carregou o DOM!");
@@ -76,35 +76,48 @@ document.addEventListener('DOMContentLoaded', function() {
     window.comprarPassagem = function(botao) {
         var rotaEscolhida = botao.getAttribute("data-rota");  // Obter a rota do atributo data-rota
         console.log("Rota escolhida: " + rotaEscolhida);
-        if (rotaEscolhida) {
-            var rota = rotasDisponiveis.find(r => r.rota === rotaEscolhida);
-            if (rota && rota.passagens > 0) {
-                rota.passagens--;
-                console.log("Passagem comprada. Passagens restantes:", rota.passagens);
-                // Atualizar UI
-                mostrarRotas(rotasDisponiveis);
-                // Propagar para outros usuários
-                if (ws) {
-                    ws.send(JSON.stringify({ rota: rotaEscolhida, passagens: rota.passagens }));
-                }
-            } else {
-                console.log("Passagens esgotadas para esta rota.");
-                alert("Passagens esgotadas para esta rota.");
-            }
-        }
-    }
-
-    // Função para inicializar WebSocket
-    function iniciarWebSocket() {
-        ws = new WebSocket("ws://localhost:6789/");
-        ws.onmessage = function(event) {
-            var data = JSON.parse(event.data);
-            console.log("Atualização recebida via WebSocket:", data);
+        fetch('http://localhost:777/api/comprar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ rota: rotaEscolhida })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log("Passagem comprada:", data);
             var rotaAtualizada = rotasDisponiveis.find(r => r.rota === data.rota);
             if (rotaAtualizada) {
                 rotaAtualizada.passagens = data.passagens;
                 mostrarRotas(rotasDisponiveis);
             }
+        })
+        .catch(error => {
+            console.error('Erro ao comprar passagem:', error);
+        });
+    }
+
+    // Função para inicializar WebSocket
+    function iniciarWebSocket() {
+        ws = new WebSocket("ws://localhost:6789/");
+        ws.onopen = function() {
+            console.log("WebSocket conectado.");
+        };
+        ws.onmessage = function(event) {
+            var data = JSON.parse(event.data);
+            console.log("Atualização recebida via WebSocket:", data);
+            if (data.token) {
+                console.log("Token atualizado:", data.token);
+                return;
+            }
+            var rotaAtualizada = rotasDisponiveis.find(r => r.rota === data.rota);
+            if (rotaAtualizada) {
+                rotaAtualizada.passagens = data.passagens;
+                mostrarRotas(rotasDisponiveis);
+            }
+        };
+        ws.onerror = function(error) {
+            console.error("Erro no WebSocket:", error);
         };
         ws.onclose = function() {
             console.log("WebSocket desconectado. Tentando reconectar...");
