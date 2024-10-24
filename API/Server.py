@@ -1,183 +1,141 @@
-import os
 import time
-import tempfile
+from flask import Flask, jsonify, request
+from flask_cors import CORS
+import threading
+import socket
 import json
-import asyncio
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import websockets
+from collections import deque
 
-# Identificadores dos servidores
-server_id = 1  # Altere para o ID deste servidor (1, 2 ou 3 conforme necessário)
-next_server = 2  # ID do próximo servidor no anel
+app = Flask(__name__)
+CORS(app)  # Habilita CORS para todas as rotas
 
-# Funções para carregamento das rotas e passagens do arquivo
-def load_routes(file):
-    routes = {}
-    with open(file, 'r') as f:
-        for linha in f:
-            if linha.strip():
-                rota, passagens = linha.strip().split(": ")
-                routes[rota] = int(passagens)
-    return routes
+# Rotas sob a responsabilidade do servidor 1
+routes_server1 = {
+    'Recife->Fortaleza->Salvador->Brasilia': 5,
+    'Recife->Brasilia->Fortaleza->Manaus': 3,
+    'Recife->Salvador->Brasilia->Uberlandia': 4,
+}
 
-routes = load_routes('cidades.txt')
+# Lista de servidores
+servers = [
+    ('localhost', 8082),  # Adicione o segundo servidor aqui
+]
 
-# Funções de locking baseadas em arquivos
-def acquire_lock_with_timeout(lock_name, acquire_timeout=10, lock_timeout=10):
-    lockfile = os.path.join(tempfile.gettempdir(), lock_name)
-    start_time = time.time()
-    while time.time() - start_time < acquire_timeout:
-        try:
-            fd = os.open(lockfile, os.O_CREAT | os.O_EXCL | os.O_RDWR)
-            with os.fdopen(fd, 'w') as lockfile_fd:
-                lockfile_fd.write(str(os.getpid()))
-            return lockfile
-        except FileExistsError:
-            time.sleep(0.01)
-    raise TimeoutError("Could not acquire lock within the specified timeout")
+# Token inicial
+token = {
+    "current_holder": 1,
+}
 
-def release_lock(lock_name):
-    lockfile = os.path.join(tempfile.gettempdir(), lock_name)
-    try:
-        os.remove(lockfile)
-    except FileNotFoundError:
-        pass
+# Fila de solicitações pendentes
+pending_requests = deque()
 
-# Lista para armazenar os WebSocket connections
-connected_clients = []
-
-# Lista para armazenar as solicitações em espera
-pending_requests = []
-
-# Função para propagar atualizações via WebSockets
-async def propagate_update(data):
-    if connected_clients:
-        await asyncio.gather(*(client.send(json.dumps(data)) for client in connected_clients))
-        # Atualiza o arquivo local
-        with open('cidades.txt', 'w') as f:
-            for rota, passagens in routes.items():
-                f.write(f"{rota}: {passagens}\n")
-
-# Função para comprar passagem
-def comprar_passagem(rota):
-    global routes
-    if routes[rota] > 0:
-        routes[rota] -= 1
-        return {"rota": rota, "passagens": routes[rota]}
+def process_purchase(route):
+    if route in routes_server1 and routes_server1[route] > 0:
+        routes_server1[route] -= 1
+        return {"success": True, "remaining": routes_server1[route]}  # Retorna as passagens restantes
     else:
-        return {"rota": rota, "passagens": 0}
+        return {"success": False, "message": "Passagem indisponível ou rota inválida."}
 
-# Funções relacionadas ao Token Ring
-current_token_holder = 1  # ID do servidor atual com o token
+@app.route('/api/rota', methods=['POST'])
+def descobrir_rotas():
+    data = request.json
+    origem = data.get('origem')
+    destino = data.get('destino')
+    
+    rotas_disponiveis = {}
+    
+    for rota, passagens in routes_server1.items():
+        if rota.startswith(origem) and rota.endswith(destino):
+            rotas_disponiveis[rota] = {"passagens": passagens}
 
-async def pass_token():
-    global current_token_holder
+    return jsonify({"rotas": rotas_disponiveis})
+
+@app.route('/api/comprar', methods=['POST', 'OPTIONS'])
+def comprar_passagem():
+    if request.method == 'OPTIONS':
+        return jsonify({}), 200  # Responde às preflight requests com 200
+    data = request.json
+    rota = data.get('rota')
+    
+    if rota:
+        if token['current_holder'] == 1:  # Verifica se o servidor possui o token
+            print(f"Servidor 1: Processando compra para a rota: {rota}")
+            resultado = process_purchase(rota)
+            if resultado['success']:
+                print(f"Compra realizada para a rota: {rota}")
+                return jsonify({"success": True, "remaining": resultado['remaining']})
+            else:
+                print(f"Falha na compra: {resultado['message']}")
+                return jsonify({"success": False, "message": resultado['message']})
+        else:
+            # Adiciona a solicitação à fila de pendências
+            pending_requests.append(rota)
+            print(f"Servidor 1: Solicitação para a rota {rota} adicionada à fila.")
+            return jsonify({"success": False, "message": "Solicitação adicionada à fila."})
+    else:
+        return jsonify({"error": "Rota não especificada"}), 400
+
+@app.route('/api/verificar_token', methods=['GET'])
+def verificar_token():
+    return jsonify({"has_token": token['current_holder'] == 1})  # Verifica se o servidor atual tem o token
+
+def process_pending_requests():
     while True:
-        await asyncio.sleep(5)  # Tempo para manter o token
-        if current_token_holder == server_id:
-            current_token_holder = next_server  # Passa o token para o próximo servidor
-            await propagate_update({"token": current_token_holder})
-            await process_pending_requests()  # Processa as solicitações em espera
+        if pending_requests:
+            rota = pending_requests.popleft()  # Processa a próxima solicitação pendente
+            print(f"Servidor 1: Processando solicitação pendente para a rota: {rota}")
+            resultado = process_purchase(rota)
+            if resultado['success']:
+                print(f"Compra processada para a rota pendente: {rota}")
+            else:
+                print(f"Falha na compra da rota pendente: {rota}")
 
-# Processa as solicitações em espera quando o token é recebido
-async def process_pending_requests():
-    global pending_requests
-    while pending_requests:
-        request = pending_requests.pop(0)
-        result = comprar_passagem(request["rota"])
-        resposta = {"rota": result["rota"], "passagens": result["passagens"]}
-        await propagate_update(resposta)
-        # Envia a resposta para o cliente que fez a solicitação
-        for client in connected_clients:
-            await client.send(json.dumps(resposta))
-
-# Classe para tratar requisições HTTP
-class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
-    def do_OPTIONS(self):
-        self.send_response(200)
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
-        self.end_headers()
-
-    def do_POST(self):
-        global current_token_holder
-        if self.path == "/api/rota":
-            print("Recebendo solicitação de rota...")
-            content_length = int(self.headers["Content-Length"])
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data)
-            print("Dados recebidos:", data)
-            origem = data.get("origem")
-            destino = data.get("destino")
-            # Processamento das rotas e passagens
-            relevant_routes = {k: v for k, v in routes.items() if origem in k and destino in k}
-            resposta = {"rotas": [{"rota": rota, "passagens": passagens} for rota, passagens in relevant_routes.items()]}
-            self.send_response(200)
-            self.send_header("Content-type", "application/json")
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.end_headers()
-            self.wfile.write(json.dumps(resposta).encode())
-        elif self.path == "/api/comprar":
-            content_length = int(self.headers["Content-Length"])
-            post_data = self.rfile.read(content_length)
-            data = json.loads(post_data)
-            rota = data.get("rota")
-            if rota in routes:
-                if current_token_holder == server_id:  # Verifica se este servidor tem o token
-                    lock_id = acquire_lock_with_timeout("rota_lock")
-                    if lock_id:
-                        try:
-                            result = comprar_passagem(rota)
-                            resposta = {"rota": result["rota"], "passagens": result["passagens"]}
-                            self.send_response(200)
-                            self.send_header("Content-type", "application/json")
-                            self.send_header('Access-Control-Allow-Origin', '*')
-                            self.end_headers()
-                            self.wfile.write(json.dumps(resposta).encode())
-                            asyncio.create_task(propagate_update(resposta))  # Certifica que a task é criada corretamente
-                        finally:
-                            release_lock("rota_lock")
-                    else:
-                        self.send_response(503)
-                        self.send_header("Content-type", "application/json")
-                        self.send_header('Access-Control-Allow-Origin', '*')
-                        self.end_headers()
-                        self.wfile.write(json.dumps({"erro": "Não foi possível adquirir o lock"}).encode())
-                else:
-                    pending_requests.append({"rota": rota})
-                    self.send_response(202)  # Accepted
-                    self.send_header("Content-type", "application/json")
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"mensagem": "A compra está em espera até que o servidor receba o token."}).encode())
-
-# Função para rodar o servidor HTTP
-def run_http_server():
-    server_address = ("", 777)
-    httpd = HTTPServer(server_address, SimpleHTTPRequestHandler)
-    print(f"Servidor rodando na porta 777")
-    httpd.serve_forever()
-
-# Função para rodar o servidor WebSocket
-async def run_ws_server():
-    async def handler(websocket, path):
-        connected_clients.append(websocket)
-        print(f"Cliente conectado: {websocket.remote_address}")
+def start_token_server():
+    while True:
         try:
-            async for message in websocket:
-                print(f"Recebido: {message}")
-        finally:
-            print(f"Cliente desconectado: {websocket.remote_address}")
-            connected_clients.remove(websocket)
-    server = await websockets.serve(handler, "localhost", 6789)
-    print("WebSocket server started at ws://localhost:6789")
-    await server.wait_closed()
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+                s.bind(('localhost', 8084))
+                s.listen()
+                print("Servidor de tokens está ouvindo...")
+                while True:
+                    conn, addr = s.accept()
+                    print(f"Servidor 1: Conexão recebida de {addr}")
+                    with conn:
+                        token_data = json.loads(conn.recv(1024).decode('utf-8'))
+                        print(f"Servidor 1: Token recebido: {token_data}")
+                        print("Servidor 1: Processando token...")
+                        
+                        # Verifica se há mais servidores
+                        if len(servers) > 0:
+                            token['current_holder'] = (token['current_holder'] % (len(servers) + 1)) + 1  # Passa para o próximo servidor
+                            print(f"Servidor 1: Token passado para o Servidor {token['current_holder']}.")
+                        else:
+                            print("Servidor 1: Não há outros servidores. Mantendo o token.")
 
-# Função principal para rodar ambos os servidores
-async def main():
-    asyncio.create_task(run_ws_server())
-    run_http_server()  # HTTP Server bloqueante, portanto precisa ser executado assim
+                        send_token(token_data)
+                        process_pending_requests()  # Processa as solicitações pendentes
+        except Exception as e:
+            print(f"Ocorreu um erro no servidor de tokens: {e}")
+            time.sleep(1)
 
-if __name__ == "__main__":
-    asyncio.run(main())
+def send_token(token_data):
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            if len(servers) > 0:
+                next_server = servers[(token['current_holder'] - 1) % len(servers)]
+                s.connect(next_server)
+                s.sendall(json.dumps(token_data).encode('utf-8'))
+                print(f"Servidor 1: Token enviado para {next_server}.")
+            else:
+                print("Servidor 1: Não há servidores para enviar o token.")
+    except Exception as e:
+        print(f"Ocorreu um erro ao enviar o token: {e}")
+
+def iniciar_token_thread():
+    thread = threading.Thread(target=start_token_server)
+    thread.start()
+
+if __name__ == '__main__':
+    iniciar_token_thread()
+    app.run(port=8081, debug=True)  # Servidor escutando na porta 8081
